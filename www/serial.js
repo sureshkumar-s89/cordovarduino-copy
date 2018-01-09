@@ -66,6 +66,15 @@ var serial = {
             'registerReadCallback',
             []
         );
+    },
+    usbStatus: function(successCallback, errorCallback) {
+        cordova.exec(
+            successCallback,
+            errorCallback,
+            'Serial',
+            'usbStatus',
+            []
+        );
     }
 
 };

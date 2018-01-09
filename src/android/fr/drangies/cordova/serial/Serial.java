@@ -49,6 +49,7 @@ public class Serial extends CordovaPlugin {
 	private static final String ACTION_WRITE = "writeSerial";
 	private static final String ACTION_WRITE_HEX = "writeSerialHex";
 	private static final String ACTION_CLOSE = "closeSerial";
+	private static final String ACTION_USB_STATUS = "usbStatus";
 	private static final String ACTION_READ_CALLBACK = "registerReadCallback";
 
 	// UsbManager instance to deal with permission and opening
@@ -137,6 +138,11 @@ public class Serial extends CordovaPlugin {
 		// Register read callback
 		else if (ACTION_READ_CALLBACK.equals(action)) {
 			registerReadCallback(callbackContext);
+			return true;
+		}
+		// Register read callback
+		else if (ACTION_USB_STATUS.equals(action)) {
+			usbStatus(callbackContext);
 			return true;
 		}
 		// the action doesn't exist
@@ -403,6 +409,29 @@ public class Serial extends CordovaPlugin {
 					callbackContext.error(e.getMessage());
 				}
 				onDeviceStateChange();
+			}
+		});
+	}
+
+
+	/**
+	 * Check the serial port status
+	 * @param callbackContext the cordova {@link CallbackContext}
+	 */
+	private void usbStatus(final CallbackContext callbackContext) {
+		cordova.getThreadPool().execute(new Runnable() {
+			public void run() {
+				manager = (UsbManager) cordova.getActivity().getSystemService(Context.USB_SERVICE);
+				UsbSerialProber prober;
+				prober = UsbSerialProber.getDefaultProber();
+				List<UsbSerialDriver> availableDrivers = prober.findAllDrivers(manager);
+				if (availableDrivers.isEmpty()) {
+					callbackContext.error("Device disconnected!");
+				}
+				else {
+					callbackContext.success("Device connected!");
+				}
+
 			}
 		});
 	}
